@@ -253,6 +253,7 @@
 </main>
 
 <footer class="px-6 py-8 text-center">
+  <p id="visitCounter" class="mb-3 text-xs tracking-[0.2em] uppercase" style="color:#bbb; min-height:1em;"></p>
   <p class="text-xs tracking-wide" style="color:#aaa;">© 2026 HAL. Built from scratch.</p>
 </footer>
 
@@ -273,6 +274,42 @@
     document.addEventListener('mouseleave', function(){
       glow.classList.remove('active');
     });
+  })();
+
+  (function(){
+    var el = document.getElementById('visitCounter');
+    if(!el) return;
+
+    var API = 'https://abacus.jasoncameron.dev';
+    var NS = 'harlio011011-bit-homepage';
+    var KEY = 'visits';
+
+    var myVisits = parseInt(localStorage.getItem('hal_my_visits') || '0', 10);
+    var countedThisSession = sessionStorage.getItem('hal_counted');
+
+    if(!countedThisSession){
+      myVisits += 1;
+      localStorage.setItem('hal_my_visits', String(myVisits));
+      sessionStorage.setItem('hal_counted', '1');
+    }
+
+    var endpoint = countedThisSession
+      ? API + '/get/' + NS + '/' + KEY
+      : API + '/hit/' + NS + '/' + KEY;
+
+    function render(total){
+      var parts = [];
+      if(typeof total === 'number'){
+        parts.push('total visitors ' + total.toLocaleString());
+      }
+      parts.push('あなたは ' + myVisits + ' 回目の訪問');
+      el.textContent = parts.join(' ・ ');
+    }
+
+    fetch(endpoint)
+      .then(function(r){ return r.json(); })
+      .then(function(data){ render(data.value); })
+      .catch(function(){ render(); });
   })();
 </script>
 
